@@ -24,13 +24,41 @@ startX = int(width * 0.1) # the start position of the first column
 startY = int(height * 0.9) # the lowest position of all the columns
 endX = int(width * 0.9) # the rightmost position
 endY = int(height * 0.1)  # the highest position of the longest column
-base = int(0.1 * height)
+# base = int(0.1 * height)
+base = int(0.1 * startY)
+
+colScale = 0.8 # the col width occpying the column
+colMostScale = 0.8 # the most height occupying the column
+numWidScale = 0.5
+numHeiScale = 0.05
+numFontScale = 0.13
+numFontSize = int(numFontScale * max(height,width) * numFontScale)
+numFont = 'freesansbold.ttf'
+yDisScale = 0.02
+columnMostHeight = int(startY * colMostScale)
+yDis = int(yDisScale * columnMostHeight) #每个数字距离其柱子顶部的距离e
 
 
-tips = 'press space to start or pause'
 fontsize = int(height * 0.08)
 font = 'freesansbold.ttf'
 fontObj = pygame.font.SysFont(font,fontsize,bold = True)
-textSurfaceObj = fontObj.render(tips,False,black)
-textRectObj = textSurfaceObj.get_rect()
-textRectObj.center = (width // 2, height * 0.03)
+
+tips = 'press space to start or escape to exit'
+startTextSurfaceObj = fontObj.render(tips,False,black)
+startTextRectObj = startTextSurfaceObj.get_rect()
+startTextRectObj.center = (width // 2, height * 0.03)
+
+tips = 'press space to pause or escape to exit'
+pauseTextSurfaceObj = fontObj.render(tips,False,black)
+pauseTextRectObj = pauseTextSurfaceObj.get_rect()
+pauseTextRectObj.center = (width // 2, height * 0.03)
+
+tips = 'press space to continue or escape to exit'
+contTextSurfaceObj = fontObj.render(tips,False,black)
+contTextRectObj = contTextSurfaceObj.get_rect()
+contTextRectObj.center = (width // 2, height * 0.03)
+
+tips = 'press space to exit'
+exitTextSurfaceObj = fontObj.render(tips,False,black)
+exitTextRectObj = exitTextSurfaceObj.get_rect()
+exitTextRectObj.center = (width // 2, height * 0.03)

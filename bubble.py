@@ -4,80 +4,19 @@ __date__ = '2019/1/5'
 __time__ = '17:07'
 __filename__ = 'bubble.py'
 
-import pygame
-from pygame.locals import K_SPACE
-from common import getNumList,getMax,getMin,validNumList,eventHandle,getDistance,getScale,drawNum
-from locals import width,height,yellow,red,blue,white,green,startX,startY,endX,endY,base,font,textRectObj,textSurfaceObj
+import pygame,time
+from pygame.locals import K_SPACE,K_ESCAPE
+from common import getNumList,getMax,getMin,validNumList,eventHandle,getDistance,getScale,drawNum,\
+                    draw,exitGame
+from locals import width,height,yellow,red,blue,white,green,black,startX,startY,endX,endY,base,font,\
+    colScale,colMostScale,numHeiScale,numWidScale,numFontScale,yDisScale,columnMostHeight,yDis,numFontSize,numFont,\
+    exitTextRectObj,exitTextSurfaceObj,\
+    pauseTextRectObj,pauseTextSurfaceObj,\
+    contTextRectObj,contTextSurfaceObj,\
+    startTextRectObj,startTextSurfaceObj
 
 
-
-def draw(numlist):
-    global DISPLAYSURF
-    DISPLAYSURF = pygame.display.set_mode((width,height))
-    DISPLAYSURF.fill(white)
-    valid = validNumList(numlist)
-    if not valid:
-        return
-
-    low = getMin(numlist)
-    high = getMax(numlist)
-    startX = width * 0.1
-    startY = height * 0.9
-    endX = width * 0.9
-    endY = height * 0.1
-
-    distance = (endX - startX) // len(numlist)
-
-    base = 0.1 * height
-    if low == high:
-        scale = 1
-    else:
-        scale = 1 / (high - low)
-
-    while True:
-        for index in range(len(numlist)):
-            if index == 0:
-                if scale == 1:
-                    pygame.draw.rect(DISPLAYSURF,red,(distance * index + startX,startY,distance * 0.8,- 0.8 * height))
-                else:
-                    pygame.draw.rect(DISPLAYSURF,red,(distance * index + startX,startY,distance * 0.8,- base - (numlist[index] - low) * scale * 0.7 * height))
-            else:
-                if scale == 1:
-                    pygame.draw.rect(DISPLAYSURF,blue,(distance * index + startX,startY,distance *0.8,- 0.8 * height))
-                else:
-                    pygame.draw.rect(DISPLAYSURF,blue,(distance * index + startX,startY,distance * 0.8,- base - (numlist[index] - low) * scale * 0.7 * height))
-
-        pygame.display.update()
-        eventHandle(pygame.event.get())
-
-def showStart(numList,displaysurf,distance,scale,low):
-    colwidth = int(distance * 0.8)
-    colMostHeight = int(height * 0.8)
-    numWid = distance // 2
-    numHei = height // 20
-    fontsize = (numHei + numWid) // 2 * 4 // 5
-    sameNumPos = 0.08 * height
-    while True:
-        for index in range(len(numList)):
-            x = distance * index + startX
-            if scale == 1:
-                pygame.draw.rect(displaysurf,green,(x,startY,colwidth,-colMostHeight))
-                numSurfaceObj, numRectObj = drawNum(str(numList[index]),x + numWid, sameNumPos,blue,
-                                                      fontsize,font)
-                displaysurf.blit(numSurfaceObj,numRectObj)
-            else:
-                colHei = - base - (numList[index] - low) * scale * 0.7 * height
-                pygame.draw.rect(displaysurf, green, (x, startY, colwidth, colHei))
-                numSurfaceObj, numRectObj = drawNum(str(numList[index]), x + numWid, 0.9 * height + colHei - 0.01 * height, blue,
-                                                      fontsize, font)
-                displaysurf.blit(numSurfaceObj, numRectObj)
-        displaysurf.blit(textSurfaceObj,textRectObj)
-        pygame.display.update()
-        key = eventHandle(pygame.event.get())
-        if key == K_SPACE:
-            return
-
-def beginShow(numList,displaysurf,distance,scale,low):
+def beginSort(numList,displaysurf,distance,scale,low):
     colwidth = int(distance * 0.8)
     colMostHeight = int(height * 0.8)
     numWid = distance // 2
@@ -92,28 +31,78 @@ def beginShow(numList,displaysurf,distance,scale,low):
                 pass
         last -= 1
 
-def endShow(numList,displaysurf,distance,scale,low):
-    pass
+def start(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize):
+    while True:
+        draw(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize)
+        key = eventHandle(pygame.event.get())
+        if key == K_SPACE:
+            return
+
+def sort(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize,bg = white,contSur = contTextSurfaceObj,contRect = contTextRectObj):
+    lastIndex = len(numList) - 1
+    clock = pygame.time.Clock()
+    while lastIndex >= -1:
+        for index in range(lastIndex):
+            colorTemp = columnColorList[index]
+            columnColorList[index] = red
+            if numList[index] > numList[index + 1]:
+                numList[index],numList[index + 1] = numList[index + 1],numList[index]
+                coloHeightList[index],coloHeightList[index + 1] = coloHeightList[index + 1],coloHeightList[index]
+            draw(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize,bg)
+            columnColorList[index] = colorTemp
+            key = eventHandle(pygame.event.get())
+            if key == K_ESCAPE:
+                exitGame()
+            elif key == K_SPACE:
+                while True:
+                    draw(displaysurf, numList, numPosList, columnColorList, numColorList, coloHeightList, colWidth,
+                         middle, ydis, contSur, contRect, font, fontsize)
+                    key = eventHandle(pygame.event.get())
+                    if key == K_SPACE:
+                        break
+                    elif key == K_ESCAPE:
+                        exitGame()
+            pygame.display.update()
+            clock.tick(3)
+        columnColorList[lastIndex] = blue
+        lastIndex -= 1
+    columnColorList[0] = blue
+    draw(displaysurf, numList, numPosList, columnColorList, numColorList, coloHeightList, colWidth, middle, ydis,
+         tipsSurfaceObj, tipsRectObj, font, fontsize)
+
+end = start # 两者逻辑参数都一样，只是要显示的内容不同而已。
 
 def main():
-    a = getNumList()
-    # a.append(-100)
+    a = getNumList()[:10]
     print(a)
     res = validNumList(a)
     if not res:
         print('error:the list is invalid,please check')
-        exit()
-    # a = [20] * 20
-    low = getMin(a)
-    high = getMax(a)
-    distance = getDistance(startX,endX,len(a))
-    scale = getScale(low,high)
+        exitGame()
+    low = getMin(a) # get the smallest num in the list
+    high = getMax(a) # get the largest num in the list
+    distance = getDistance(startX,endX,len(a)) # get the distance from column to column
+    colWidth = int(distance * colScale) # get the column's real width
+    numPosList = []
+    for i in range(len(a)):
+        numPosList.append(startX + distance * i)
+    colHeightList = []
+    colHeight = int(startY * colMostScale)
+    if low == high:
+        for i in range(len(a)):
+            colHeightList.append(colHeight)
+    else:
+        for num in a:
+            colHeightList.append(int(colHeight * (num - low) / (high - low)) + base)
+    columnColor = [green] * len(a) # get the origin color for all the columns
+    numColor = [black] * len(a)
     pygame.display.set_caption('bubble')
     DISPLAYSURF = pygame.display.set_mode((width, height))
     DISPLAYSURF.fill(white)
-    showStart(a,DISPLAYSURF,distance,scale,low)
-    beginShow(a,DISPLAYSURF,distance,scale,low)
-    showEnd(a,DISPLAYSURF,distance,scale,low)
+    print(dir(DISPLAYSURF))
+    start(DISPLAYSURF,a,numPosList,columnColor,numColor,colHeightList,colWidth,colWidth // 2,yDis,startTextSurfaceObj,startTextRectObj,numFont,numFontSize)
+    sort(DISPLAYSURF,a,numPosList,columnColor,numColor,colHeightList,colWidth,colWidth // 2,yDis,pauseTextSurfaceObj,pauseTextRectObj,numFont,numFontSize)
+    end(DISPLAYSURF,a,numPosList,columnColor,numColor,colHeightList,colWidth,colWidth // 2,yDis,exitTextSurfaceObj,exitTextRectObj,numFont,numFontSize)
 
 
 if __name__ == '__main__':
