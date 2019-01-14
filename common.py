@@ -8,8 +8,8 @@ import random
 import os
 from pygame.locals import KEYDOWN,K_ESCAPE,K_SPACE
 import pygame
-from locals import colScale,height,width,colMostScale,numFontScale,numHeiScale,numWidScale,startX,\
-    startY,green,blue,black,fontsize,font,fontObj,white
+from locals import colScale,height,width,colMostScale,numFontScale,numHeiScale,numWidScale,startX,endX,\
+    startY,green,blue,black,fontsize,font,fontObj,white,base
 
 def validNumList(numList):
     '''
@@ -34,14 +34,17 @@ def validNumList(numList):
 
     return True
 
-def getNumList():
+def getNumList(start = 0,end = 100,count = 100):
 
     '''
     this function is used to get a num list with random integer between 0 and 100
     :return: [int]
     '''
-
-    a = [random.randint(0,100) for i in range(100)]
+    if start >= end:
+        raise ValueError('the start num must less than end num: start = %s,end = %s' % (start,end))
+    if count < 1:
+        raise ValueError('you must specify a negative integer:count = %s' % count)
+    a = [random.randint(start,end) for i in range(count)]
     return a
 
 def check_package(packName = 'pygame'):
@@ -111,35 +114,6 @@ def drawNum(text,x,y,color,fontsize,font):
     textRectObj.center = (x, y)
     return textSurfaceObj,textRectObj
 
-# def showStart(numList,displaysurf,distance,scale,low):
-#     colwidth = int(distance * colScale)
-#     colMostHeight = int(height * colMostScale)
-#     numWid = int(distance * numWidScale)
-#     numHei = int(height * numHeiScale)
-#     fontsize = int((numHei + numWid) * numFontScale)
-#     sameNumPos = 0.08 * height
-#     while True:
-#         for index in range(len(numList)):
-#             x = distance * index + startX
-#             if scale == 1:
-#                 pygame.draw.rect(displaysurf,green,(x,startY,colwidth,-colMostHeight))
-#                 numSurfaceObj, numRectObj = drawNum(str(numList[index]),x + numWid, sameNumPos,blue,
-#                                                       fontsize,font)
-#                 displaysurf.blit(numSurfaceObj,numRectObj)
-#             else:
-#                 colHei = - base - (numList[index] - low) * scale * 0.7 * height
-#                 pygame.draw.rect(displaysurf, green, (x, startY, colwidth, colHei))
-#                 numSurfaceObj, numRectObj = drawNum(str(numList[index]), x + numWid, 0.9 * height + colHei - 0.01 * height, blue,
-#                                                       fontsize, font)
-#                 displaysurf.blit(numSurfaceObj, numRectObj)
-#         displaysurf.blit(textSurfaceObj,textRectObj)
-#         pygame.display.update()
-#         key = eventHandle(pygame.event.get())
-#         if key == K_SPACE:
-#             return
-
-
-# showEnd = showStart
 
 def draw(displaysurf,numList,numPosList,columnColorList,numColorList,colHeightList,colWidth,middlex,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize,bg = white):
     '''
@@ -171,3 +145,39 @@ def draw(displaysurf,numList,numPosList,columnColorList,numColorList,colHeightLi
 def exitGame():
     pygame.quit()
     exit()
+
+def start(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize):
+    while True:
+        draw(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize)
+        key = eventHandle(pygame.event.get())
+        if key == K_SPACE:
+            return
+
+end = start
+
+class Prepare:
+    def __init__(self):
+        pygame.init()
+        self.numArray = getNumList(count= 100)
+        low = getMin(self.numArray)
+        high = getMax(self.numArray)
+        distance = getDistance(startX,endX,len(self.numArray))
+        self.columnWidth = int(distance * colScale)
+        self.columnPosList = []
+        for i in range(len(self.numArray)):
+            self.columnPosList.append(startX + distance * i)
+        self.columnHeightList = []
+        mostColumnHeight = int(startY * colMostScale)
+        if low == high:
+            for i in range(len(self.numArray)):
+                self.colHeightList.append(mostColumnHeight)
+        else:
+            for num in self.numArray:
+                self.columnHeightList.append(int(mostColumnHeight * (num - low) / (high - low)) + base)
+        self.columnColor = [green] * len(self.numArray)  # get the origin color for all the columns
+        self.numColor = [black] * len(self.numArray)
+        pygame.display.set_caption('bubble')
+        self.displaysurf = pygame.display.set_mode((width, height))
+        self.displaysurf.fill(white)
+
+prepare = Prepare()

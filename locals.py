@@ -62,3 +62,4 @@ tips = 'press space to exit'
 exitTextSurfaceObj = fontObj.render(tips,False,black)
 exitTextRectObj = exitTextSurfaceObj.get_rect()
 exitTextRectObj.center = (width // 2, height * 0.03)
+
