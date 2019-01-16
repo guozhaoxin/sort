@@ -24,15 +24,14 @@ startX = int(width * 0.1) # the start position of the first column
 startY = int(height * 0.9) # the lowest position of all the columns
 endX = int(width * 0.9) # the rightmost position
 endY = int(height * 0.1)  # the highest position of the longest column
-# base = int(0.1 * height)
 base = int(0.1 * startY)
 
 colScale = 0.8 # the col width occpying the column
 colMostScale = 0.8 # the most height occupying the column
 numWidScale = 0.5
 numHeiScale = 0.05
-numFontScale = 0.13
-numFontSize = int(numFontScale * max(height,width) * numFontScale)
+# numFontSize = int(numFontScale * min(height,width))
+numLargestFontSize = int(numHeiScale * min(height,width))
 numFont = 'freesansbold.ttf'
 yDisScale = 0.02
 columnMostHeight = int(startY * colMostScale)
@@ -43,20 +42,20 @@ fontsize = int(height * 0.08)
 font = 'freesansbold.ttf'
 fontObj = pygame.font.SysFont(font,fontsize,bold = True)
 
-tips = 'press space to start or escape to exit'
-startTextSurfaceObj = fontObj.render(tips,False,black)
-startTextRectObj = startTextSurfaceObj.get_rect()
-startTextRectObj.center = (width // 2, height * 0.03)
-
-tips = 'press space to pause or escape to exit'
+tips = 'press space to run or escape to exit'
 pauseTextSurfaceObj = fontObj.render(tips,False,black)
 pauseTextRectObj = pauseTextSurfaceObj.get_rect()
 pauseTextRectObj.center = (width // 2, height * 0.03)
 
+tips = 'press space to pause or escape to exit'
+runTextSurfaceObj = fontObj.render(tips,False,black)
+runTextRectObj = runTextSurfaceObj.get_rect()
+runTextRectObj.center = (width // 2, height * 0.03)
+
 tips = 'press space to continue or escape to exit'
-contTextSurfaceObj = fontObj.render(tips,False,black)
-contTextRectObj = contTextSurfaceObj.get_rect()
-contTextRectObj.center = (width // 2, height * 0.03)
+continueTextSurfaceObj = fontObj.render(tips,False,black)
+continueTextRectObj = continueTextSurfaceObj.get_rect()
+continueTextRectObj.center = (width // 2, height * 0.03)
 
 tips = 'press space to exit'
 exitTextSurfaceObj = fontObj.render(tips,False,black)

@@ -1,15 +1,21 @@
-#coding: utf-8
+[]#coding: utf-8
 __author__ = 'gold'
 __date__ = '2019/1/5'
 __time__ = '17:09'
 __filename__ = 'common.py'
 
+import threading
 import random
 import os
 from pygame.locals import KEYDOWN,K_ESCAPE,K_SPACE
 import pygame
-from locals import colScale,height,width,colMostScale,numFontScale,numHeiScale,numWidScale,startX,endX,\
-    startY,green,blue,black,fontsize,font,fontObj,white,base
+import time
+from locals import colScale,height,width,colMostScale,numHeiScale,numWidScale,startX,endX,yDis,\
+    startY,green,blue,black,fontsize,font,fontObj,white,base,numLargestFontSize,\
+    exitTextRectObj,exitTextSurfaceObj,\
+    pauseTextRectObj,pauseTextSurfaceObj,\
+    continueTextRectObj,continueTextSurfaceObj,\
+    runTextRectObj,runTextSurfaceObj
 
 def validNumList(numList):
     '''
@@ -158,7 +164,8 @@ end = start
 class Prepare:
     def __init__(self):
         pygame.init()
-        self.numArray = getNumList(count= 100)
+
+        self.numArray = getNumList(count = 1)
         low = getMin(self.numArray)
         high = getMax(self.numArray)
         distance = getDistance(startX,endX,len(self.numArray))
@@ -170,7 +177,7 @@ class Prepare:
         mostColumnHeight = int(startY * colMostScale)
         if low == high:
             for i in range(len(self.numArray)):
-                self.colHeightList.append(mostColumnHeight)
+                self.columnHeightList.append(mostColumnHeight)
         else:
             for num in self.numArray:
                 self.columnHeightList.append(int(mostColumnHeight * (num - low) / (high - low)) + base)
@@ -181,3 +188,94 @@ class Prepare:
         self.displaysurf.fill(white)
 
 prepare = Prepare()
+
+class ArraySet:
+    def __init__(self,numarray = None):
+        if numarray is None or len(numarray) == 0:
+            self.numList = getNumList(count=50) #默认造出一个100个[0,100]之间的整数出来
+        else:
+            self.numList = numarray
+
+        low = getMin(self.numList)
+        high = getMax(self.numList)
+        distance = getDistance(startX, endX, len(self.numList))
+        self.columnWidth = int(distance * colScale)
+        self.columnPosList = []
+        for i in range(len(self.numList)):
+            self.columnPosList.append(startX + distance * i)
+        self.columnHeightList = []
+        mostColumnHeight = int(startY * colMostScale)
+        if low == high:
+            for i in range(len(self.numList)):
+                self.columnHeightList.append(mostColumnHeight)
+        else:
+            for num in self.numList:
+                self.columnHeightList.append(int(mostColumnHeight * (num - low) / (high - low)) + base)
+        self.columnColorList = [green] * len(self.numList)  # get the origin color for all the columns
+        self.numColorList = [black] * len(self.numList)
+
+class DrawPanelThread(threading.Thread):
+    def __init__(self,arraySet:ArraySet,tipsarray,displaysurf,statusarray):
+        super(DrawPanelThread,self).__init__()
+        self.arraySet = arraySet
+        self.tipsarray = tipsarray
+        self.displaysurf = displaysurf
+        self.statusarray = statusarray
+
+    def run(self):
+        clock = pygame.time.Clock()
+        clock.tick(50)
+        fontsize = min(numLargestFontSize,int(self.arraySet.columnWidth * 1.5))
+        while self.statusarray[0] != -1:
+            print('额 这是啥子')
+            self.displaysurf.fill(white)
+            for index in range(len(self.arraySet.numList)):
+                pygame.draw.rect(self.displaysurf,self.arraySet.columnColorList[index],
+                                 (self.arraySet.columnPosList[index],startY,self.arraySet.columnWidth,-self.arraySet.columnHeightList[index])
+                                 )
+                numSurfaceObj,numRectObj = drawNum(str(self.arraySet.numList[index]),
+                                                    self.arraySet.columnPosList[index] + self.arraySet.columnWidth // 2,
+                                                    startY - self.arraySet.columnHeightList[index] - yDis,
+                                                    self.arraySet.numColorList[index],
+                                                    fontsize,font
+                                                    )
+                self.displaysurf.blit(numSurfaceObj,numRectObj)
+            for tips in self.tipsarray:
+                self.displaysurf.blit(tips[0],tips[1])
+            pygame.display.update()
+
+
+class SortThread(threading.Thread):
+    def __init__(self,runstatusarray,sortedarray):
+        super(SortThread,self).__init__()
+        self.runstatusarray = runstatusarray
+        self.sortedarray = sortedarray
+
+    def run(self):
+        pass
+
+class EventMonitorThread(threading.Thread):
+    def __init__(self,tipsarray,runstatusarray,sortedarray):
+        super(EventMonitorThread,self).__init__()
+        self.tipsarray = tipsarray
+        self.runstatus = runstatusarray
+        self.sortedarray = sortedarray
+
+    def run(self):
+        '''键盘事件监测线程运行方法'''
+        statusShow = [(pauseTextSurfaceObj,pauseTextRectObj),(runTextSurfaceObj,runTextRectObj),(exitTextSurfaceObj,exitTextRectObj)]
+        time.sleep(1000)
+        while True:
+            time.sleep(0.05)
+            print('what')
+            if self.sortedarray[0]:
+                self.tipsarray[0] = statusShow[-1]
+            for event in pygame.event.get():
+                print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+                if event.type == KEYDOWN:
+                    if event.key == K_SPACE:
+                        # 0表示暂停中，1表示运行中
+                        self.runstatus[0] = (self.runstatus[0] + 1) % 2
+                        self.tipsarray[0] = statusShow[self.runstatus[0]]
+                    elif event.key == K_ESCAPE:
+                        exitGame()
