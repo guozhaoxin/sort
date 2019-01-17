@@ -13,6 +13,7 @@ from locals import red,blue,white,width,height,\
     pauseTextRectObj,pauseTextSurfaceObj
 
 import time
+import threading
 
 
 # def sort(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize,bg = white,contSur = contTextSurfaceObj,contRect = contTextRectObj):
@@ -52,23 +53,33 @@ import time
 
 
 class BubbleSortThread(SortThread):
-    def __init__(self,arraySet,statusarray,sortedarray):
+    def __init__(self,lock:threading.RLock,arraySet,statusarray,sortedarray):
         super(BubbleSortThread,self).__init__(statusarray,sortedarray)
         self.arrayset = arraySet
+        self.lock = lock
 
     def run(self):
-        time.sleep(1000)
+        # time.sleep(1000)
         lastIndex = len(self.arrayset.numList) - 1
         print(self.runstatusarray)
-        while self.runstatusarray[0] != 0:
-            print('fuck')
-            break
+        flag = True
+        pausetime = 0.05
+        while flag:
+            print('不能忍啊')
+            time.sleep(pausetime)
+            # self.lock.acquire()
+            if self.runstatusarray[0] != 0:
+                flag = False
+            # self.lock.release()
+        # self.lock.acquire()
         if self.runstatusarray[0] == -1:
             return
+        # self.lock.release()
         while lastIndex > -1:
             print(self.arrayset.numList)
+            time.sleep(pausetime)
             for index in range(0,lastIndex):
-                time.sleep(0.01)
+                time.sleep(pausetime)
                 colorTemp1 = self.arrayset.columnColorList[index]
                 colorTemp2 = self.arrayset.columnColorList[index + 1]
                 self.checkpause()
@@ -91,10 +102,15 @@ class BubbleSortThread(SortThread):
 
 
     def checkpause(self):
-        while self.runstatusarray[0] != 0:
-            break
+        flag = True
+        while flag:
+            # self.lock.acquire()
+            if self.runstatusarray[0] != 0:
+                flag = False
+            # self.lock.release()
 
 def main():
+    lock = threading.RLock()
     pygame.init()
     pygame.display.set_caption('bubble')
     displaysurf = pygame.display.set_mode((width,height))
@@ -103,9 +119,9 @@ def main():
     sortedarray = [False]
     runstatusarray = [0]
     tipsArray = [(pauseTextSurfaceObj,pauseTextRectObj)]
-    eventThread = EventMonitorThread(tipsArray,runstatusarray,sortedarray)
-    drawThread = DrawPanelThread(arraySet,tipsArray,displaysurf,runstatusarray)
-    sortedThread = BubbleSortThread(arraySet,runstatusarray,sortedarray)
+    eventThread = EventMonitorThread(lock,tipsArray,runstatusarray,sortedarray)
+    drawThread = DrawPanelThread(lock,arraySet,tipsArray,displaysurf,runstatusarray)
+    sortedThread = BubbleSortThread(lock,arraySet,runstatusarray,sortedarray)
     drawThread.start()
     eventThread.start()
     sortedThread.start()

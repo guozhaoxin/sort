@@ -1,4 +1,4 @@
-[]#coding: utf-8
+#coding: utf-8
 __author__ = 'gold'
 __date__ = '2019/1/5'
 __time__ = '17:09'
@@ -215,19 +215,21 @@ class ArraySet:
         self.numColorList = [black] * len(self.numList)
 
 class DrawPanelThread(threading.Thread):
-    def __init__(self,arraySet:ArraySet,tipsarray,displaysurf,statusarray):
+    def __init__(self,lock:threading.RLock,arraySet:ArraySet,tipsarray,displaysurf,statusarray):
         super(DrawPanelThread,self).__init__()
         self.arraySet = arraySet
         self.tipsarray = tipsarray
         self.displaysurf = displaysurf
         self.statusarray = statusarray
+        self.lock = lock
 
     def run(self):
         clock = pygame.time.Clock()
-        clock.tick(50)
+        clock.tick(5)
         fontsize = min(numLargestFontSize,int(self.arraySet.columnWidth * 1.5))
         while self.statusarray[0] != -1:
             print('额 这是啥子')
+            # self.lock.acquire()
             self.displaysurf.fill(white)
             for index in range(len(self.arraySet.numList)):
                 pygame.draw.rect(self.displaysurf,self.arraySet.columnColorList[index],
@@ -243,6 +245,7 @@ class DrawPanelThread(threading.Thread):
             for tips in self.tipsarray:
                 self.displaysurf.blit(tips[0],tips[1])
             pygame.display.update()
+            # self.lock.release()
 
 
 class SortThread(threading.Thread):
@@ -255,21 +258,27 @@ class SortThread(threading.Thread):
         pass
 
 class EventMonitorThread(threading.Thread):
-    def __init__(self,tipsarray,runstatusarray,sortedarray):
+    def __init__(self,lock:threading.RLock,tipsarray,runstatusarray,sortedarray):
         super(EventMonitorThread,self).__init__()
         self.tipsarray = tipsarray
         self.runstatus = runstatusarray
         self.sortedarray = sortedarray
+        self.lock = lock
 
     def run(self):
         '''键盘事件监测线程运行方法'''
         statusShow = [(pauseTextSurfaceObj,pauseTextRectObj),(runTextSurfaceObj,runTextRectObj),(exitTextSurfaceObj,exitTextRectObj)]
-        time.sleep(1000)
+        # time.sleep(1000)
+        pausetime = 0.01
         while True:
-            time.sleep(0.05)
-            print('what')
+            time.sleep(pausetime)
+            # print('what')
+            # self.lock.acquire()
             if self.sortedarray[0]:
                 self.tipsarray[0] = statusShow[-1]
+            # self.lock.release()
+            #             # self.lock.acquire()
+            print('到底哪里有问题？？？？？？？？？？？？？？？？？？？？？？？？？？？？？？？')
             for event in pygame.event.get():
                 print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
                 if event.type == KEYDOWN:
@@ -278,4 +287,6 @@ class EventMonitorThread(threading.Thread):
                         self.runstatus[0] = (self.runstatus[0] + 1) % 2
                         self.tipsarray[0] = statusShow[self.runstatus[0]]
                     elif event.key == K_ESCAPE:
+                        self.runstatus[0] = -1
                         exitGame()
+            # self.lock.release()
