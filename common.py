@@ -9,13 +9,13 @@ import random
 import os
 from pygame.locals import KEYDOWN,K_ESCAPE,K_SPACE
 import pygame
-import time
-from locals import colScale,height,width,colMostScale,numHeiScale,numWidScale,startX,endX,yDis,\
-    startY,green,blue,black,fontsize,font,fontObj,white,base,numLargestFontSize,\
+from locals import colScale,height,width,yDis,startX,endX,startY,base,columnMostHeight,\
+    font,numLargestFontSize,\
     exitTextRectObj,exitTextSurfaceObj,\
     pauseTextRectObj,pauseTextSurfaceObj,\
-    continueTextRectObj,continueTextSurfaceObj,\
-    runTextRectObj,runTextSurfaceObj
+    runTextRectObj,runTextSurfaceObj,\
+    defaultArrayLen,\
+    green,black,white
 
 def validNumList(numList):
     '''
@@ -73,47 +73,41 @@ def check_package(packName = 'pygame'):
     else:
         return 0
 
-def getMax(numList):
-    '''
-    this func is used to get the max num in the given num list
-    :param numList: []
-    :return: num
-    '''
-    return max(numList)
-
-
-def getMin(numList):
-    '''
-    this func is used to get the min num in the given num list
-    :param numList: []
-    :return: num
-    '''
-    return min(numList)
-
-def eventHandle(events):
-    '''
-    this method is used to handle keyboard event
-    if the user press esc,then the pro is finished;else return the key
-    :param events: [],a serious of keyboard event
-    :return: event.key
-    '''
-    for event in events:
-        if event.type == KEYDOWN and event.key == K_ESCAPE:
-            exitGame()
-        if event.type == KEYDOWN:
-            return event.key
 
 def getDistance(left,right,steps):
+    '''
+    this function is used to get the distance between 2 contiguous columns
+    :param left:int,the left position
+    :param right:int,the right position
+    :param steps:int,the count of the columns
+    :return:int,the width of the 2 contiguous columns
+    '''
     return (right - left) // steps
 
 def getScale(low,high):
-    if low == high:
+    '''
+    calculate the column's scale in the height
+    :param low: number,the smallest element
+    :param high: number,the largest element
+    :return: float,the colum's scale in the height
+    '''
+    if low == high: # when the smallest and largest num are same,all the columns have the same height.
         scale = 1
     else:
         scale = 1 / (high - low)
     return scale
 
 def drawNum(text,x,y,color,fontsize,font):
+    '''
+    this function is used to draw the num rect object
+    :param text: str,the characters to draw
+    :param x: int, the rect object's x position
+    :param y: int, the rect object's y position
+    :param color: (int,int,int),the rect object's color
+    :param fontsize: int,the characters' size
+    :param font: font,the characters' font
+    :return: the rect's surface and itself.
+    '''
     fontObj = pygame.font.SysFont(font, fontsize)
     textSurfaceObj = fontObj.render(text, False, color)
     textRectObj = textSurfaceObj.get_rect()
@@ -121,172 +115,219 @@ def drawNum(text,x,y,color,fontsize,font):
     return textSurfaceObj,textRectObj
 
 
-def draw(displaysurf,numList,numPosList,columnColorList,numColorList,colHeightList,colWidth,middlex,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize,bg = white):
+def exitGame():
     '''
-    draw infor on the main display
-    :param displaysurf:
-    :param numList: [],all the elements in the list to sort
-    :param numPosList: [],all the columns' x position
-    :param numColor: [],every column's corresponding color
-    :param colHeightList: [],every column's height.
-    :param colWidth: int,the column's width
-    :param middlex: int,the num away from its column's x position,positive.
-    :param ydis: the y away from the height of its column position.
-    :param tipsSurfaceObj:the tips surface obj to draw on the display.
-    :param tipsRectObj:the tips rect to draw on the display.
-    :param font:str,the font used to draw the nums on top of every column.
-    :param fontsize:int,the size of the num on the top of every column.
+    exit the program
     :return:
     '''
-
-    displaysurf.fill(white)
-    for index in range(len(numList)):
-        pygame.draw.rect(displaysurf,columnColorList[index],(numPosList[index],startY,colWidth,-colHeightList[index]))
-        numSurfaceObj, numRectObj = drawNum(str(numList[index]), numPosList[index] + middlex, startY - colHeightList[index] - ydis, numColorList[index],
-                                            fontsize, font)
-        displaysurf.blit(numSurfaceObj,numRectObj)
-    displaysurf.blit(tipsSurfaceObj,tipsRectObj)
-    pygame.display.update()
-
-def exitGame():
     pygame.quit()
     exit()
 
-def start(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize):
-    while True:
-        draw(displaysurf,numList,numPosList,columnColorList,numColorList,coloHeightList,colWidth,middle,ydis,tipsSurfaceObj,tipsRectObj,font,fontsize)
-        key = eventHandle(pygame.event.get())
-        if key == K_SPACE:
-            return
-
-end = start
-
-class Prepare:
-    def __init__(self):
-        pygame.init()
-
-        self.numArray = getNumList(count = 1)
-        low = getMin(self.numArray)
-        high = getMax(self.numArray)
-        distance = getDistance(startX,endX,len(self.numArray))
-        self.columnWidth = int(distance * colScale)
-        self.columnPosList = []
-        for i in range(len(self.numArray)):
-            self.columnPosList.append(startX + distance * i)
-        self.columnHeightList = []
-        mostColumnHeight = int(startY * colMostScale)
-        if low == high:
-            for i in range(len(self.numArray)):
-                self.columnHeightList.append(mostColumnHeight)
-        else:
-            for num in self.numArray:
-                self.columnHeightList.append(int(mostColumnHeight * (num - low) / (high - low)) + base)
-        self.columnColor = [green] * len(self.numArray)  # get the origin color for all the columns
-        self.numColor = [black] * len(self.numArray)
-        pygame.display.set_caption('bubble')
-        self.displaysurf = pygame.display.set_mode((width, height))
-        self.displaysurf.fill(white)
-
-prepare = Prepare()
 
 class ArraySet:
+    '''
+    this class is used to store all the relvant information about the array.
+    the attributes are listed：
+        numList:[number,],the array to sort;
+        columnWidth:int,every column's width;
+        columnPosList:[int],all the columns' x position;
+        columnHeightList:[int],all the columns' height;
+        numColorList:[(int,int,int)],all the numbers' color;
+        columnColorList:[(int,int,int)],all the columns' height;
+        numRectList:[(,)],all the numbers' rect surface,the surface is the 1th element;
+        orderly:bool,if the sort has finished,True if finshed else False;
+        runstate:int,the program is running or paused or exit,0:paused or not started,1:running,-1:exit.
+    '''
     def __init__(self,numarray = None):
+        '''
+        :param numarray: [number],the array to sort,if None or empty,the class will generate a random array.z
+        '''
         if numarray is None or len(numarray) == 0:
-            self.numList = getNumList(count=50) #默认造出一个100个[0,100]之间的整数出来
+            self.numList = getNumList(count=defaultArrayLen) #默认造出一个100个[0,100]之间的整数出来
         else:
             self.numList = numarray
 
-        low = getMin(self.numList)
-        high = getMax(self.numList)
+        low = min(self.numList)
+        high = max(self.numList)
         distance = getDistance(startX, endX, len(self.numList))
         self.columnWidth = int(distance * colScale)
         self.columnPosList = []
         for i in range(len(self.numList)):
             self.columnPosList.append(startX + distance * i)
         self.columnHeightList = []
-        mostColumnHeight = int(startY * colMostScale)
         if low == high:
             for i in range(len(self.numList)):
-                self.columnHeightList.append(mostColumnHeight)
+                self.columnHeightList.append(columnMostHeight)
         else:
             for num in self.numList:
-                self.columnHeightList.append(int(mostColumnHeight * (num - low) / (high - low)) + base)
+                self.columnHeightList.append(int(columnMostHeight * (num - low) / (high - low)) + base)
         self.columnColorList = [green] * len(self.numList)  # get the origin color for all the columns
         self.numColorList = [black] * len(self.numList)
+        self.numRectList = []
+        numfontsize = min(numLargestFontSize, int(self.columnWidth * 1.5))
+        for index in range(len(self.numList)):
+            numSurfaceObj, numRectObj = drawNum(str(self.numList[index]),
+                    self.columnPosList[index] + self.columnWidth // 2,
+                    startY - self.columnHeightList[index] - yDis,
+                    self.numColorList[index],
+                    numfontsize, font
+                    )
+            self.numRectList.append((numSurfaceObj,numRectObj))
+        self.orderly = False
+        self.runstate = 0
+
+    def getState(self):
+        '''
+        the the pro's running state
+        :return: int
+        '''
+        return self.runstate
+
+    def setState(self,state):
+        '''
+        set the pro's running state
+        :param state: int,0,-1,1
+        :return:
+        '''
+        self.runstate = state
+
+    def setOrderly(self):
+        '''
+        update the orderly attri to indicate the pro has finished sorting work.
+        :return:
+        '''
+        self.orderly = True
+
+    def isOrderly(self):
+        '''
+        judge if the pro has finished sorting or not
+        :return: bool
+        '''
+        return self.orderly
+
+    def swapNumRect(self,leftind,rightind):
+        '''
+        when 2 numbers in an array swaped,their relevant columns have to be swaped,
+        the function is used to finish the work;
+        we need to swap the 2 nums' rect object and set their new centers.
+        :param leftind: int,index,the index of the first element to swap
+        :param rightind: int,index,the index of the second element to swap
+        :return:
+        '''
+        pos1 = (self.numRectList[rightind][1].center[0],self.numRectList[leftind][1].center[1])
+        pos2 = (self.numRectList[leftind][1].center[0],self.numRectList[rightind][1].center[1])
+        self.numRectList[leftind][1].center = pos1
+        self.numRectList[rightind][1].center = pos2
+        self.numRectList[leftind],self.numRectList[rightind] = self.numRectList[rightind],self.numRectList[leftind]
 
 class DrawPanelThread(threading.Thread):
-    def __init__(self,lock:threading.RLock,arraySet:ArraySet,tipsarray,displaysurf,statusarray):
+    '''
+    the draw panel thread,but it doesn't listen to the panel's events.
+    it has some attributes:
+        arraySet:ArraySet instance;
+        tipsarray:[()],the tips needed to draw on the main panel.
+        displaysurf:the pygame.display instance to draw all informations.
+        lock:threading.Lock instance,to lock 1 or more elements when needed.
+    '''
+    def __init__(self,arraySet:ArraySet,tipsarray,displaysurf,lock:threading.Lock):
         super(DrawPanelThread,self).__init__()
         self.arraySet = arraySet
         self.tipsarray = tipsarray
         self.displaysurf = displaysurf
-        self.statusarray = statusarray
         self.lock = lock
 
     def run(self):
         clock = pygame.time.Clock()
-        clock.tick(5)
-        fontsize = min(numLargestFontSize,int(self.arraySet.columnWidth * 1.5))
-        while self.statusarray[0] != -1:
-            print('额 这是啥子')
-            # self.lock.acquire()
+        while self.arraySet.getState() != -1:
             self.displaysurf.fill(white)
+            self.lock.acquire() # here we have to acquire the lock firsly,as the sort thread is running to fast.
+            # below is used to draw all the columns.
             for index in range(len(self.arraySet.numList)):
                 pygame.draw.rect(self.displaysurf,self.arraySet.columnColorList[index],
                                  (self.arraySet.columnPosList[index],startY,self.arraySet.columnWidth,-self.arraySet.columnHeightList[index])
                                  )
-                numSurfaceObj,numRectObj = drawNum(str(self.arraySet.numList[index]),
-                                                    self.arraySet.columnPosList[index] + self.arraySet.columnWidth // 2,
-                                                    startY - self.arraySet.columnHeightList[index] - yDis,
-                                                    self.arraySet.numColorList[index],
-                                                    fontsize,font
-                                                    )
+            # below is used to drawl all the numbers objects.
+            for numSurfaceObj,numRectObj in self.arraySet.numRectList:
                 self.displaysurf.blit(numSurfaceObj,numRectObj)
+            self.lock.release()
+            # below is used to draw all the tips
             for tips in self.tipsarray:
                 self.displaysurf.blit(tips[0],tips[1])
             pygame.display.update()
-            # self.lock.release()
+            clock.tick(60)
 
 
 class SortThread(threading.Thread):
-    def __init__(self,runstatusarray,sortedarray):
+    '''
+    the sort thread,you must sub this class.
+    the attributes are listed:
+        arrayset:ArraySet instance;
+        lock:threading.Lock,
+    '''
+    def __init__(self,arraySet,lock):
         super(SortThread,self).__init__()
-        self.runstatusarray = runstatusarray
-        self.sortedarray = sortedarray
+        self.arrayset = arraySet
+        self.lock = lock
 
     def run(self):
         pass
 
-class EventMonitorThread(threading.Thread):
-    def __init__(self,lock:threading.RLock,tipsarray,runstatusarray,sortedarray):
-        super(EventMonitorThread,self).__init__()
-        self.tipsarray = tipsarray
-        self.runstatus = runstatusarray
-        self.sortedarray = sortedarray
-        self.lock = lock
+    def checkpause(self):
+        '''
+        thif function is used to juede if the pro has been paused.
+        :return:
+        '''
+        flag = True
+        while flag:
+            if self.arrayset.getState() != 0:
+                flag = False
 
-    def run(self):
-        '''键盘事件监测线程运行方法'''
-        statusShow = [(pauseTextSurfaceObj,pauseTextRectObj),(runTextSurfaceObj,runTextRectObj),(exitTextSurfaceObj,exitTextRectObj)]
-        # time.sleep(1000)
-        pausetime = 0.01
-        while True:
-            time.sleep(pausetime)
-            # print('what')
-            # self.lock.acquire()
-            if self.sortedarray[0]:
-                self.tipsarray[0] = statusShow[-1]
-            # self.lock.release()
-            #             # self.lock.acquire()
-            print('到底哪里有问题？？？？？？？？？？？？？？？？？？？？？？？？？？？？？？？')
-            for event in pygame.event.get():
-                print('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-                if event.type == KEYDOWN:
-                    if event.key == K_SPACE:
-                        # 0表示暂停中，1表示运行中
-                        self.runstatus[0] = (self.runstatus[0] + 1) % 2
-                        self.tipsarray[0] = statusShow[self.runstatus[0]]
-                    elif event.key == K_ESCAPE:
-                        self.runstatus[0] = -1
-                        exitGame()
-            # self.lock.release()
+# below is a list with all the possible tips on the mpanel
+# the 1th is pause tip, the 2th is run tip,the 3th is exit tip.
+# the list is mainly used in the eventhandl function.
+statusShow = [(pauseTextSurfaceObj,pauseTextRectObj),(runTextSurfaceObj,runTextRectObj),(exitTextSurfaceObj,exitTextRectObj)]
+def eventhandl(events,arrayset,tipsarry):
+    '''
+    the function is used to handle all mouse and keyboard events.
+    :param events: list,all captured events.
+    :param arrayset: ArraySet instance, as all changes will take effect in this variable.
+    :param tipsarry: list,the tips list
+    :return:
+    '''
+    for event in events:
+        if event.type == KEYDOWN:
+            if event.key == K_SPACE:
+                arrayset.setState((arrayset.getState() + 1) % 2)
+                tipsarry[0] = statusShow[arrayset.getState()]
+            elif event.key == K_ESCAPE:
+                arrayset.setState(-1)
+
+def showSort(numarray,SortThread):
+    '''
+    the only api used by all the sort functions,you only needed to pass one valid number and the
+    sort thread,and the function will finished all work to sort.
+    :param numarray:[number],the array you want to sort.
+    :param SortThread: SortThread sub class.
+    :return:
+    '''
+    pygame.init()
+    os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (10,30) # set the main panel's position on the screen.
+    pygame.display.set_caption('bubble')
+    displaysurf = pygame.display.set_mode((width, height)) # the main displaysurf
+    displaysurf.fill(white)
+    arraySet = ArraySet(numarray) # get the ArraySet instance
+    tipsArray = [statusShow[0],] #the tips array
+    lock = threading.Lock()
+    drawThread = DrawPanelThread(arraySet, tipsArray, displaysurf, lock)
+    sortedThread = SortThread(arraySet,lock)
+    drawThread.setDaemon(True) # set the draw thread daemon thread
+    sortedThread.setDaemon(True) # set the sort thread daemon thread
+    drawThread.start()
+    sortedThread.start()
+    while True:
+        events = pygame.event.get()
+        eventhandl(events,arraySet,tipsArray)
+        if arraySet.getState() == -1: # the user pressed exit on the main panel.
+            exitGame()
+        if arraySet.isOrderly(): # the array is ordered.
+            tipsArray[0] = statusShow[2]
