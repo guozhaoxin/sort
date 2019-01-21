@@ -7,6 +7,7 @@ __filename__ = 'common.py'
 import threading
 import random
 import os
+import time
 from pygame.locals import KEYDOWN,K_ESCAPE,K_SPACE
 import pygame
 from locals import colScale,height,width,yDis,startX,endX,startY,base,columnMostHeight,\
@@ -15,7 +16,7 @@ from locals import colScale,height,width,yDis,startX,endX,startY,base,columnMost
     pauseTextRectObj,pauseTextSurfaceObj,\
     runTextRectObj,runTextSurfaceObj,\
     defaultArrayLen,\
-    green,black,white
+    green,black,white,blue,red
 
 def validNumList(numList):
     '''
@@ -129,7 +130,7 @@ class ArraySet:
     this class is used to store all the relvant information about the array.
     the attributes are listed：
         numList:[number,],the array to sort;
-        columnWidth:int,every column's width;
+        columnWidth:int,every column's width(not include the space between 2 columns);
         columnPosList:[int],all the columns' x position;
         columnHeightList:[int],all the columns' height;
         numColorList:[(int,int,int)],all the numbers' color;
@@ -137,7 +138,9 @@ class ArraySet:
         numRectList:[(,)],all the numbers' rect surface,the surface is the 1th element;
         orderly:bool,if the sort has finished,True if finshed else False;
         runstate:int,the program is running or paused or exit,0:paused or not started,1:running,-1:exit.
+        distance:int,the column between 2 columns(please differ the columnWidth).
     '''
+
     def __init__(self,numarray = None):
         '''
         :param numarray: [number],the array to sort,if None or empty,the class will generate a random array.z
@@ -149,11 +152,11 @@ class ArraySet:
 
         low = min(self.numList)
         high = max(self.numList)
-        distance = getDistance(startX, endX, len(self.numList))
-        self.columnWidth = int(distance * colScale)
+        self.distance = getDistance(startX, endX, len(self.numList))
+        self.columnWidth = int(self.distance * colScale)
         self.columnPosList = []
         for i in range(len(self.numList)):
-            self.columnPosList.append(startX + distance * i)
+            self.columnPosList.append(startX + self.distance * i)
         self.columnHeightList = []
         if low == high:
             for i in range(len(self.numList)):
@@ -220,6 +223,46 @@ class ArraySet:
         self.numRectList[rightind][1].center = pos2
         self.numRectList[leftind],self.numRectList[rightind] = self.numRectList[rightind],self.numRectList[leftind]
 
+    def fixColumnColor(self,index):
+        try:
+            self.columnColorList[index] = blue
+        except IndexError as e:
+            pass
+
+    def curColumnColor(self,index):
+        try:
+            self.columnColorList[index] = red
+        except IndexError as e:
+            pass
+
+    def resetColumnColor(self,index):
+        try:
+            self.columnColorList[index] = green
+        except IndexError as e:
+            pass
+
+    def setColumnHeight(self,index,columnHeight):
+        self.columnHeightList[index] = columnHeight
+
+    def getColumnHeight(self,index):
+        return self.columnHeightList[index]
+
+    def setRectCenter(self,index,x,y):
+        try:
+            self.numRectList[index].center = (x,y)
+        except IndexError as e:
+            pass
+
+    def getRectCenter(self,index):
+        try:
+            return self.numRectList[index].center
+        except IndexError as e:
+            return (-1,-1)
+
+    def getDistance(self):
+        return self.distance
+
+
 class DrawPanelThread(threading.Thread):
     '''
     the draw panel thread,but it doesn't listen to the panel's events.
@@ -272,15 +315,14 @@ class SortThread(threading.Thread):
     def run(self):
         pass
 
-    def checkpause(self):
+    def checkpause(self,pause = 0.01):
         '''
         thif function is used to juede if the pro has been paused.
         :return:
         '''
-        flag = True
-        while flag:
-            if self.arrayset.getState() != 0:
-                flag = False
+        while self.arrayset.getState() == 0:
+            time.sleep(pause)
+
 
 # below is a list with all the possible tips on the mpanel
 # the 1th is pause tip, the 2th is run tip,the 3th is exit tip.
@@ -302,7 +344,7 @@ def eventhandl(events,arrayset,tipsarry):
             elif event.key == K_ESCAPE:
                 arrayset.setState(-1)
 
-def showSort(numarray,SortThread):
+def showSort(numarray,SortThread,name):
     '''
     the only api used by all the sort functions,you only needed to pass one valid number and the
     sort thread,and the function will finished all work to sort.
@@ -312,7 +354,7 @@ def showSort(numarray,SortThread):
     '''
     pygame.init()
     os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (10,30) # set the main panel's position on the screen.
-    pygame.display.set_caption('bubble')
+    pygame.display.set_caption(name)
     displaysurf = pygame.display.set_mode((width, height)) # the main displaysurf
     displaysurf.fill(white)
     arraySet = ArraySet(numarray) # get the ArraySet instance

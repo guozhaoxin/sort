@@ -55,4 +55,4 @@ class BubbleSortThread(SortThread):
         return
 
 if __name__ == '__main__':
-    showSort(None,BubbleSortThread)
+    showSort(None,BubbleSortThread,'bubble')
