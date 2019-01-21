@@ -284,18 +284,22 @@ class DrawPanelThread(threading.Thread):
         while self.arraySet.getState() != -1:
             self.displaysurf.fill(white)
             self.lock.acquire() # here we have to acquire the lock firsly,as the sort thread is running to fast.
+
             # below is used to draw all the columns.
             for index in range(len(self.arraySet.numList)):
                 pygame.draw.rect(self.displaysurf,self.arraySet.columnColorList[index],
                                  (self.arraySet.columnPosList[index],startY,self.arraySet.columnWidth,-self.arraySet.columnHeightList[index])
                                  )
+
             # below is used to drawl all the numbers objects.
             for numSurfaceObj,numRectObj in self.arraySet.numRectList:
                 self.displaysurf.blit(numSurfaceObj,numRectObj)
             self.lock.release()
+
             # below is used to draw all the tips
             for tips in self.tipsarray:
                 self.displaysurf.blit(tips[0],tips[1])
+
             pygame.display.update()
             clock.tick(60)
 
