@@ -60,4 +60,4 @@ exitTextSurfaceObj = fontObj.render(tips,False,black)
 exitTextRectObj = exitTextSurfaceObj.get_rect()
 exitTextRectObj.center = (width // 2, height * 0.03)
 
-defaultArrayLen = 50 # the default count of the random array's lengthen
+defaultArrayLen = 100 # the default count of the random array's lengthen
