@@ -327,6 +327,10 @@ class SortThread(threading.Thread):
         while self.arrayset.getState() == 0:
             time.sleep(pause)
 
+    def swapNum(self,left,right):
+        self.arrayset.numList[left],self.arrayset.numList[right] = \
+        self.arrayset.numList[right],self.arrayset.numList[left]
+
 
 # below is a list with all the possible tips on the mpanel
 # the 1th is pause tip, the 2th is run tip,the 3th is exit tip.

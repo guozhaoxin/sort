@@ -4,9 +4,8 @@ __date__ = '2019/1/22'
 __time__ = '10:34'
 __filename__ = 'heap.py'
 
-from common import SortThread,showSort,ArraySet,getNumList,checkOrder
+from common import SortThread,showSort
 import time
-import threading
 
 class HeapThread(SortThread):
     def __init__(self,arrayset,lock):
