@@ -377,3 +377,16 @@ def showSort(numarray,SortThread,name):
             exitGame()
         if arraySet.isOrderly(): # the array is ordered.
             tipsArray[0] = statusShow[2]
+
+def checkOrder(numList):
+    '''
+    this function is used to check if an array is ordered
+    :param numList: [],the array to judge
+    :return: bool,True if order else False.
+    '''
+    if len(numList) <= 1:
+        return True
+    for index in range(len(numList) - 1):
+        if numList[index] > numList[index + 1]:
+            return False
+    return True
