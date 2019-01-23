@@ -31,7 +31,7 @@ class HeapKthThread(SortThread):
             time.sleep(self.pause)
             if (len(self.arrayset.numList) - index) == self.kth:
                 self.arrayset.kthColumnColor(index)
-                print(self.arrayset.numList[index])
+                print('in heap the ans is',self.arrayset.numList[index])
                 break
             self.dfs(0,index)
         self.arrayset.setOrderly()
@@ -110,6 +110,10 @@ if __name__ == '__main__':
     b = copy.deepcopy(array)
     b.sort(reverse=True)
     kth = random.randint(0,100)
-    print(b)
-    print(b[kth - 1])
+    if kth < 0:
+        kth = 0
+    if kth >= len(b):
+        kth = len(b) - 1
+    print('the whole array sorted :',b)
+    print('the %dth ele is %d' % (kth,b[kth - 1]))
     showSort(array,HeapKthThread,'heap-kth',kth = kth)

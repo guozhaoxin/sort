@@ -32,7 +32,7 @@ class QuickKthThread(SortThread):
         self.checkpause(self.pause)
         time.sleep(self.pause)
         if partion == self.kth:
-            print(self.arrayset.numList[partion])
+            print('in quick the ans is',self.arrayset.numList[partion])
             self.arrayset.kthColumnColor(partion)
             return
         elif partion > self.kth:
@@ -118,6 +118,6 @@ if __name__ == '__main__':
         kth = 0
     if kth >= len(b):
         kth = len(b) - 1
-    print(b)
-    print(b[kth - 1])
+    print('the whole array sorted :',b)
+    print('the %dth ele is %d' % (kth,b[kth - 1]))
     showSort(numList,QuickKthThread,'kth',kth = kth)
