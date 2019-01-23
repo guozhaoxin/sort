@@ -16,7 +16,7 @@ from locals import colScale,height,width,yDis,startX,endX,startY,base,columnMost
     pauseTextRectObj,pauseTextSurfaceObj,\
     runTextRectObj,runTextSurfaceObj,\
     defaultArrayLen,\
-    green,black,white,blue,red
+    green,black,white,blue,red,orange
 
 def validNumList(numList):
     '''
@@ -241,6 +241,12 @@ class ArraySet:
         except IndexError as e:
             pass
 
+    def kthColumnColor(self,index):
+        try:
+            self.columnColorList[index] = orange
+        except IndexError as e:
+            pass
+
     def setColumnHeight(self,index,columnHeight):
         self.columnHeightList[index] = columnHeight
 
@@ -311,7 +317,7 @@ class SortThread(threading.Thread):
         arrayset:ArraySet instance;
         lock:threading.Lock,
     '''
-    def __init__(self,arraySet,lock):
+    def __init__(self,arraySet,lock,**kwargs):
         super(SortThread,self).__init__()
         self.arrayset = arraySet
         self.lock = lock
@@ -352,7 +358,7 @@ def eventhandl(events,arrayset,tipsarry):
             elif event.key == K_ESCAPE:
                 arrayset.setState(-1)
 
-def showSort(numarray,SortThread,name):
+def showSort(numarray,SortThread,name,**kwargs):
     '''
     the only api used by all the sort functions,you only needed to pass one valid number and the
     sort thread,and the function will finished all work to sort.
@@ -369,7 +375,7 @@ def showSort(numarray,SortThread,name):
     tipsArray = [statusShow[0],] #the tips array
     lock = threading.Lock()
     drawThread = DrawPanelThread(arraySet, tipsArray, displaysurf, lock)
-    sortedThread = SortThread(arraySet,lock)
+    sortedThread = SortThread(arraySet,lock,**kwargs)
     drawThread.setDaemon(True) # set the draw thread daemon thread
     sortedThread.setDaemon(True) # set the sort thread daemon thread
     drawThread.start()

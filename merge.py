@@ -53,6 +53,7 @@ class MergeThread(SortThread):
 
 
 if __name__ == '__main__':
-    array = getNumList(count=10)
-    th = MergeThread(ArraySet(array),None)
-    th.start()
+    # array = getNumList(count=10)
+    # th = MergeThread(ArraySet(array),None)
+    # th.start()
+    showSort(None,MergeThread,'merge')

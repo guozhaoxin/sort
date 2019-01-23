@@ -20,6 +20,7 @@ blue = (0,0,255)
 white = (255,255,255)
 green = (0,255,0)
 black = (0,0,0)
+orange = (255,97,0)
 
 # below are some axis's position parameters
 startX = int(width * 0.1) # the start position of the first column
