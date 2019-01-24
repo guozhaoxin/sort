@@ -16,6 +16,7 @@ class MergeThread(SortThread):
         pause = 0.1
         # self.checkpause(pause)
         self.dfs(0,len(self.arrayset.numList) - 1)
+        print('the ans is')
         print(self.arrayset.numList)
 
     def dfs(self,left,right):
