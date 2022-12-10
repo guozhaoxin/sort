@@ -10,7 +10,7 @@ import os
 import time
 from pygame.locals import KEYDOWN,K_ESCAPE,K_SPACE
 import pygame
-from locals import colScale,height,width,yDis,startX,endX,startY,base,columnMostHeight,\
+from locals import colScale,height,width,yDis,startX,startY,endX,endY,base,columnMostHeight,\
     font,numLargestFontSize,\
     exitTextRectObj,exitTextSurfaceObj,\
     pauseTextRectObj,pauseTextSurfaceObj,\
@@ -171,7 +171,7 @@ class ArraySet:
         for index in range(len(self.numList)):
             numSurfaceObj, numRectObj = drawNum(str(self.numList[index]),
                     self.columnPosList[index] + self.columnWidth // 2,
-                    startY - self.columnHeightList[index] - yDis,
+                    endY - self.columnHeightList[index] - yDis,
                     self.numColorList[index],
                     numfontsize, font
                     )
@@ -294,7 +294,7 @@ class DrawPanelThread(threading.Thread):
             # below is used to draw all the columns.
             for index in range(len(self.arraySet.numList)):
                 pygame.draw.rect(self.displaysurf,self.arraySet.columnColorList[index],
-                                 (self.arraySet.columnPosList[index],startY,self.arraySet.columnWidth,-self.arraySet.columnHeightList[index])
+                                 (self.arraySet.columnPosList[index],endY - self.arraySet.columnHeightList[index],self.arraySet.columnWidth, self.arraySet.columnHeightList[index])
                                  )
 
             # below is used to drawl all the numbers objects.

@@ -105,11 +105,12 @@ class HeapKthThread(SortThread):
         self.arrayset.setColumnHeight(index2,height1)
 
 if __name__ == '__main__':
-    array = getNumList(count = 100)
+    count = 30 # how long the array
+    array = getNumList(count = count)
     import copy,random
     b = copy.deepcopy(array)
     b.sort(reverse=True)
-    kth = random.randint(0,100)
+    kth = random.randint(0,count)
     if kth < 0:
         kth = 0
     if kth >= len(b):

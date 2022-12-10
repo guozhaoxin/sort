@@ -148,8 +148,8 @@ class DrawPanelThread(threading.Thread):
             for arraySet in self.arraySetList:
                 for index in range(len(arraySet.numList)):
                     pygame.draw.rect(self.displaysurf, arraySet.columnColorList[index],
-                                     (arraySet.columnPosList[index], arraySet.yPos, arraySet.columnWidth,
-                                      -arraySet.columnHeightList[index])
+                                     (arraySet.columnPosList[index], arraySet.yPos - arraySet.columnHeightList[index], arraySet.columnWidth,
+                                      arraySet.columnHeightList[index])
                                      )
                 self.displaysurf.blit(arraySet.nameSurface,arraySet.nameRect)
             self.displaysurf.blit(title[0],title[1])
@@ -527,7 +527,7 @@ def getColumnHeight(array):
         for i in range(len(array)):
             heightList.append(columnMostHeight)
     else:
-        base = int(height * (0.05))
+        base = int(height * 0.05)
         for i in range(len(array)):
             heightList.append(base + columnMostHeight * (array[i] - minValue) / (maxValue - minValue))
     return heightList
@@ -542,7 +542,7 @@ if __name__ == '__main__':
     os.environ['SDL_VIDEO_WINDOW_POS'] = '%d,%d' % (10,30) # set the main panel's position on the screen.
     displaysurf = pygame.display.set_mode((width,height))
     displaysurf.fill(white)
-    array = getNumList(count = 300)
+    array = getNumList(count = 25)
     heightList = getColumnHeight(array)
 
     bubbleArraySet = ArraySet(array,'bubble',0.05,0.35,0.08,0.48,0.8,heightList)

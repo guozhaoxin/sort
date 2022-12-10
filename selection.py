@@ -75,5 +75,5 @@ class SelectionThread(SortThread):
         print(self.arrayset.numList)
 
 if __name__ == '__main__':
-    array = [3,2,1,0,0,1,2,3]
-    showSort([],SelectionThread,'selection')
+    # array = [3,2,1,0,0,1,2,3]
+    showSort(None,SelectionThread,'selection')

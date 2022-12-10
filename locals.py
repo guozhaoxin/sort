@@ -10,8 +10,8 @@ pygame.init()
 
 # below is the part to get the size of the screen
 win = tkinter.Tk()
-width = win.winfo_screenwidth() # the width of the screen
-height = win.winfo_screenheight() # the height of the screen
+width = int(win.winfo_screenwidth() * .8) # the width of the screen
+height = int(win.winfo_screenheight() * .8) # the height of the screen
 
 # below are some color variables
 yellow = (255,255,0)
@@ -24,18 +24,18 @@ orange = (255,97,0)
 
 # below are some axis's position parameters
 startX = int(width * 0.1) # the start position of the first column
-startY = int(height * 0.9) # the lowest position of all the columns
-endX = int(width * 0.9) # the rightmost position panel including all the columns
-endY = int(height * 0.1)  # the highest position of the longest column
-base = int(0.1 * startY) # avoiding the smallest num's column may be 0 in height
+endX = int(width * 0.9) # the rightmost position panel including all t
+startY = int(height * 0.1) # the lowest position of all the columns# he columns
+endY = int(height * 0.9)  # the highest position of the longest column
+base = int(0.05 * height) # avoiding the smallest num's column may be 0 in height
 colScale = 0.8 # the col width occpying the space between one column to its next column.
-colMostScale = 0.8 # the most height occupying the column
+colMostScale = 0.75 # the most height occupying the column
 numWidScale = 0.5 # the number's width scale occupying one column
 numHeiScale = 0.05 # the number's height scale occupying the column's height
 numLargestFontSize = int(numHeiScale * min(height,width)) # the size of num str
 numFont = 'freesansbold.ttf' # nums' font
 yDisScale = 0.02 # the space between num and its column in height occupying the height
-columnMostHeight = int(startY * colMostScale)
+columnMostHeight = int(height * colMostScale)
 yDis = int(yDisScale * columnMostHeight) # the space between num and its column's top
 
 # below are the tip's position info
@@ -61,4 +61,4 @@ exitTextSurfaceObj = fontObj.render(tips,False,black)
 exitTextRectObj = exitTextSurfaceObj.get_rect()
 exitTextRectObj.center = (width // 2, height * 0.03)
 
-defaultArrayLen = 100 # the default count of the random array's lengthen
+defaultArrayLen = 20 # the default count of the random array's lengthen

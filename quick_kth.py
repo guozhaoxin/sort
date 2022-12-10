@@ -108,12 +108,13 @@ class QuickKthThread(SortThread):
         return left
 
 if __name__ == '__main__':
-    numList = getNumList(count = 100)
+    count = 30 # how long the array
+    numList = getNumList(count = count)
     import copy
     b = copy.deepcopy(numList)
     b.sort(reverse=True)
     import random
-    kth = random.randint(0,100)
+    kth = random.randint(0,count)
     if kth < 0:
         kth = 0
     if kth >= len(b):
